@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.env.example'
+  workflow_dispatch:
 
 jobs:
   update_env:
