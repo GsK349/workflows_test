@@ -35,7 +35,7 @@ jobs:
         run: |
           # Use parsed variables and values to update .env file
           while IFS= read -r var; do
-            echo "$var=${{ steps.prompt_values.outputs.$var }}" >> .env
+            echo "${var}=${{ steps.prompt_values.outputs[${var}] }}" >> .env
           done < var_names.txt
 
       - name: Commit changes
