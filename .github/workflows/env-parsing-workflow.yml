@@ -1,0 +1,46 @@
+name: Update .env from .env.example
+
+on:
+  push:
+    paths:
+      - '.env.example'
+
+jobs:
+  update_env:
+    runs-on: ubuntu-latest  # Specify that the job should run on a self-hosted runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Parse .env.example
+        id: parse_env
+        run: |
+          # Parse .env.example file and extract variable names
+          # Example script: replace this with your actual parsing logic
+          cat .env.example | grep -v '^#' | awk -F '=' '{print $1}' > var_names.txt
+
+      - name: Prompt for Variable Values
+        id: prompt_values
+        run: |
+          # Prompt for values for each variable in var_names.txt
+          for var in $(cat var_names.txt); do
+            echo "Enter value for $var:"
+            read value
+            echo "::set-output name=$var::$value"
+          done
+
+      - name: Update .env file
+        run: |
+          # Use parsed variables and values to update .env file
+          while IFS= read -r var; do
+            echo "$var=${{ steps.prompt_values.outputs.$var }}" >> .env
+          done < var_names.txt
+
+      - name: Commit changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add .env
+          git commit -m "Update .env from .env.example"
+          git push
